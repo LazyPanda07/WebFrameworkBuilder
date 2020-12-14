@@ -2,7 +2,11 @@
 
 #include <iostream>
 
+#include <Windows.h>
+
 using namespace std;
+
+string getGUID();
 
 namespace utility
 {
@@ -49,4 +53,46 @@ namespace utility
 
 		return data;
 	}
+
+	void modifySlnFiles(const vector<string>& slnFiles)
+	{
+		
+	}
+
+	void modifyVcxprojFiles(const vector<string>& vcxprojFiles)
+	{
+
+	}
+}
+
+string getGUID()
+{
+	GUID guid;
+	string guidString;
+
+	if (CoCreateGuid(&guid) == S_OK)
+	{
+		wstring test;
+
+		test.resize(39);
+
+		test.resize(StringFromGUID2(guid, test.data(), test.size()));
+
+		guidString.resize(test.size());
+
+		for (size_t i = 0; i < test.size(); i++)
+		{
+			guidString[i] = static_cast<char>(test[i]);
+		}
+
+		guidString.pop_back();
+
+		guidString = '\"' + move(guidString) + '\"';
+	}
+	else
+	{
+		throw runtime_error("Error create GUID");
+	}
+
+	return guidString;
 }
