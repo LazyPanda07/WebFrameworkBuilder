@@ -7,9 +7,11 @@
 
 using namespace std;
 
+void start(const vector<string>& targetVcxprojFiles, const vector<string>& targetSlnFiles, const utility::INIParser& buildSettings);
+
 int main(int argc, char** argv)
 {
-	const filesystem::path buildFile("build_file.ini");
+	const filesystem::path buildFile(BUILD_FILE);
 
 	if (!filesystem::exists(buildFile))
 	{
@@ -57,6 +59,23 @@ int main(int argc, char** argv)
 		}
 	}
 
+	start(targetVcxprojFiles, targetSlnFiles, buildSettings);
 
 	return 0;
+}
+
+void start(const vector<string>& targetVcxprojFiles, const vector<string>& targetSlnFiles, const utility::INIParser& buildSettings)
+{
+	if (targetVcxprojFiles.size() && targetSlnFiles.size())
+	{
+		
+	}
+	else if (targetVcxprojFiles.size())
+	{
+
+	}
+	else if (targetSlnFiles.size())
+	{
+		utility::modifySlnFiles(targetSlnFiles, buildSettings);
+	}
 }

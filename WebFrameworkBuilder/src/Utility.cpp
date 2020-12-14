@@ -1,12 +1,17 @@
 #include "Utility.h"
 
 #include <iostream>
+#include <array>
 
 #include <Windows.h>
+
+#include "Constants.h"
 
 using namespace std;
 
 string getGUID();
+
+void addProjectsToSlnFile(const utility::INIParser& buildSetting, string& slnFile);
 
 namespace utility
 {
@@ -14,7 +19,7 @@ namespace utility
 	{
 		vector<string> result
 		(
-			[&data]() -> size_t{
+			[&data]() -> size_t {
 				size_t questionMarkCount = 0;
 
 				for (const auto& i : data)
@@ -27,7 +32,7 @@ namespace utility
 
 				return questionMarkCount + 1;
 			}()
-		);
+				);
 		size_t startPath = 0;
 		size_t endPath = 0;
 		size_t currentIndex = 0;
@@ -49,6 +54,8 @@ namespace utility
 		cout << "Enter " << typeOfData << " with '?' as delimiter" << endl;
 		string data;
 
+		cin.ignore();
+
 		getline(cin, data);
 
 		return data;
@@ -56,7 +63,25 @@ namespace utility
 
 	void modifySlnFiles(const vector<string>& slnFiles, const INIParser& buildSettings)
 	{
+		for (const auto& i : slnFiles)
+		{
+			ifstream file(i);
+			string data;
+			string tem;
 
+			while (getline(file, tem))
+			{
+				data += tem + '\n';
+			}
+
+			cout << data << endl;
+
+			addProjectsToSlnFile(buildSettings, data);
+
+			cout << data << endl;
+
+			file.close();
+		}
 	}
 
 	void modifyVcxprojFiles(const vector<string>& vcxprojFiles, const INIParser& buildSettings)
@@ -87,7 +112,7 @@ string getGUID()
 
 		guidString.pop_back();
 
-		guidString = '\"' + move(guidString) + '\"';
+		guidString = move(guidString);
 	}
 	else
 	{
@@ -95,4 +120,55 @@ string getGUID()
 	}
 
 	return guidString;
+}
+
+void addProjectsToSlnFile(const utility::INIParser& buildSetting, string& slnFile)
+{
+	size_t lastEndProject = slnFile.rfind(sln::endProject) + sln::endProject.size() + 1;
+	const unordered_multimap<string, string>& dependecies = buildSetting.getSection("WebFramework");
+	size_t startProjectConfigurationPlatforms = slnFile.find('\n', slnFile.find(sln::projectConfigurationPlatforms)) + 1;
+	string backSlashTString;
+
+	while (slnFile[startProjectConfigurationPlatforms] != '{')
+	{
+		backSlashTString += '\t';
+		startProjectConfigurationPlatforms++;
+	}
+
+	auto addQuotes = [](const string& data) -> string
+	{
+		return '\"' + data + '\"';
+	};
+
+	auto addConfigurationPlatforms = [&slnFile, &backSlashTString](size_t startOffset, const string& guid) -> void
+	{
+		array<string, 3> platforms = { guid + '.' + "Debug|x64.", guid + '.' + "Release|x64.", guid + '.' + "ProductionRelease|x64." };
+
+		for (const auto& i : platforms)
+		{
+			for (const auto& j : sln::buildConfigurations)
+			{
+				string addBuildConfiguration = backSlashTString + i;
+
+				addBuildConfiguration += j;
+
+				addBuildConfiguration += " = " + string(i.begin() + i.find('.') + 1, i.begin() + i.find('.', i.find('.') + 1)) + '\n';
+
+				slnFile.insert(slnFile.begin() + startOffset, addBuildConfiguration.begin(), addBuildConfiguration.end());
+			}
+		}
+	};
+
+	for (const auto& [i, j] : dependecies)
+	{
+		string guid = getGUID();
+		string addProject = "Project(" + sln::visualCPlusPlusProjectGUID + ") = " + addQuotes(j) + ", " + addQuotes(j + '\\' + j + extensions::projFile) + ", " + addQuotes(guid) +
+			'\n' + sln::endProject + '\n';
+
+		slnFile.insert(slnFile.begin() + lastEndProject, addProject.begin(), addProject.end());
+
+		size_t startProjectConfigurationPlatforms = slnFile.find('\n', slnFile.find(sln::projectConfigurationPlatforms)) + 1;
+
+		addConfigurationPlatforms(startProjectConfigurationPlatforms, guid);
+	}
 }
