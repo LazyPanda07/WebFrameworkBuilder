@@ -1,0 +1,3 @@
+[submodule "INIParser"]
+	path = INIParser
+	url = https://github.com/LazyPanda07/INIParser.git

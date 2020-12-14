@@ -4,6 +4,8 @@
 
 #include <Windows.h>
 
+#pragma comment (lib, "INIParser.lib")
+
 using namespace std;
 
 string getGUID();
