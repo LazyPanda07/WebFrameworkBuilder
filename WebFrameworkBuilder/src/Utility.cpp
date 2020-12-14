@@ -74,11 +74,7 @@ namespace utility
 				data += tem + '\n';
 			}
 
-			cout << data << endl;
-
 			addProjectsToSlnFile(buildSettings, data);
-
-			cout << data << endl;
 
 			file.close();
 		}
@@ -128,12 +124,16 @@ void addProjectsToSlnFile(const utility::INIParser& buildSetting, string& slnFil
 	const unordered_multimap<string, string>& dependecies = buildSetting.getSection("WebFramework");
 	size_t startProjectConfigurationPlatforms = slnFile.find('\n', slnFile.find(sln::projectConfigurationPlatforms)) + 1;
 	string backSlashTString;
+	string topLevelOfBackSlashTString;
+	vector<string> guids;
 
 	while (slnFile[startProjectConfigurationPlatforms] != '{')
 	{
 		backSlashTString += '\t';
 		startProjectConfigurationPlatforms++;
 	}
+
+	topLevelOfBackSlashTString = string(backSlashTString.begin(), backSlashTString.end() - 1);
 
 	auto addQuotes = [](const string& data) -> string
 	{
@@ -170,5 +170,26 @@ void addProjectsToSlnFile(const utility::INIParser& buildSetting, string& slnFil
 		size_t startProjectConfigurationPlatforms = slnFile.find('\n', slnFile.find(sln::projectConfigurationPlatforms)) + 1;
 
 		addConfigurationPlatforms(startProjectConfigurationPlatforms, guid);
+
+		guids.push_back(move(guid));
 	}
+
+	string guid = getGUID();
+	string solutionFolder = "Project(" + sln::solutionFolderProjectGUID + ") = " + addQuotes(sln::solutionFolderName) +
+		", " + addQuotes(sln::solutionFolderName + '\\' + sln::solutionFolderName + extensions::projFile) + ", " + addQuotes(guid) +
+		'\n' + sln::endProject + '\n';
+
+	slnFile.insert(slnFile.begin() + lastEndProject, solutionFolder.begin(), solutionFolder.end());
+
+	size_t preLastEndGlobalSection = slnFile.rfind(sln::endGlobalSection, slnFile.rfind(sln::endGlobalSection) + 1) + sln::endGlobalSection.size() + 1;
+	string nestedProjects = topLevelOfBackSlashTString + sln::startGlobalSection + sln::nestedProjects + " = " + sln::preSolution + '\n';
+
+	for (const auto& i : guids)
+	{
+		nestedProjects += backSlashTString + i + " = " + guid + '\n';
+	}
+
+	nestedProjects += topLevelOfBackSlashTString + sln::endGlobalSection + '\n';
+
+	slnFile.insert(slnFile.begin() + preLastEndGlobalSection, nestedProjects.begin(), nestedProjects.end());
 }

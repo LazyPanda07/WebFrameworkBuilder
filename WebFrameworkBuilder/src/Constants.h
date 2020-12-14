@@ -11,6 +11,8 @@ namespace extensions
 
 namespace sln
 {
+	inline const std::string solutionFolderName = "Dependencies";
+
 	inline const std::string visualCPlusPlusProjectGUID = "{\"8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942\"}";
 	inline const std::string solutionFolderProjectGUID = "{\"2150E333-8FDC-42A3-9474-1A3956D46DE8\"}";
 
@@ -18,4 +20,9 @@ namespace sln
 
 	inline const std::string endProject = "EndProject";
 	inline const std::string projectConfigurationPlatforms = "GlobalSection(ProjectConfigurationPlatforms) = postSolution";
+	inline const std::string startGlobalSection = "GlobalSection";
+	inline const std::string endGlobalSection = "EndGlobalSection";
+	inline const std::string nestedProjects = "(NestedProjects)";
+	inline const std::string postSolution = "postSolution";
+	inline const std::string preSolution = "preSolution";
 }
