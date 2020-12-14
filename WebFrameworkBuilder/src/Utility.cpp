@@ -13,6 +13,8 @@ string getGUID();
 
 void addProjectsToSlnFile(const utility::INIParser& buildSetting, string& slnFile);
 
+void eraseConfigurationPlatforms(string& slnFile);
+
 namespace utility
 {
 	vector<string> parseData(const string& data)
@@ -65,7 +67,7 @@ namespace utility
 	{
 		for (const auto& i : slnFiles)
 		{
-			ifstream file(i);
+			fstream file(i, ios_base::in);
 			string data;
 			string tem;
 
@@ -74,7 +76,15 @@ namespace utility
 				data += tem + '\n';
 			}
 
+			eraseConfigurationPlatforms(data);
+
 			addProjectsToSlnFile(buildSettings, data);
+
+			file.close();
+
+			file.open(i, ios_base::out);
+
+			file << data;
 
 			file.close();
 		}
@@ -176,7 +186,7 @@ void addProjectsToSlnFile(const utility::INIParser& buildSetting, string& slnFil
 
 	string guid = getGUID();
 	string solutionFolder = "Project(" + sln::solutionFolderProjectGUID + ") = " + addQuotes(sln::solutionFolderName) +
-		", " + addQuotes(sln::solutionFolderName + '\\' + sln::solutionFolderName + extensions::projFile) + ", " + addQuotes(guid) +
+		", " + addQuotes(sln::solutionFolderName) + ", " + addQuotes(guid) +
 		'\n' + sln::endProject + '\n';
 
 	slnFile.insert(slnFile.begin() + lastEndProject, solutionFolder.begin(), solutionFolder.end());
@@ -192,4 +202,23 @@ void addProjectsToSlnFile(const utility::INIParser& buildSetting, string& slnFil
 	nestedProjects += topLevelOfBackSlashTString + sln::endGlobalSection + '\n';
 
 	slnFile.insert(slnFile.begin() + preLastEndGlobalSection, nestedProjects.begin(), nestedProjects.end());
+}
+
+void eraseConfigurationPlatforms(string& slnFile)
+{
+	for (const auto& i : configurationsToDelete)
+	{
+		size_t findString = slnFile.find(i);
+		size_t backSlashTCount = 0;
+
+		while (slnFile[findString] != '\n')
+		{
+			findString--;
+			backSlashTCount++;
+		}
+
+		findString++;
+
+		slnFile.erase(findString, i.size() + backSlashTCount);
+	}
 }
