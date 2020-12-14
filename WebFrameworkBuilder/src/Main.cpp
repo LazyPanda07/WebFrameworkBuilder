@@ -1,11 +1,24 @@
 #include <iostream>
+#include <filesystem>
 
 #include "Utility.h"
+
+#pragma comment (lib, "INIParser.lib")
 
 using namespace std;
 
 int main(int argc, char** argv)
 {
+	const filesystem::path buildFile("build_file.ini");
+
+	if (!filesystem::exists(buildFile))
+	{
+		cout << "Can't find build_file.ini" << endl;
+
+		return -1;
+	}
+
+	utility::INIParser buildSettings(buildFile);
 	string variant;
 	vector<string> targetVcxprojFiles;
 	vector<string> targetSlnFiles;

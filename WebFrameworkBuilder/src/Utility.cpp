@@ -4,8 +4,6 @@
 
 #include <Windows.h>
 
-#pragma comment (lib, "INIParser.lib")
-
 using namespace std;
 
 string getGUID();
@@ -56,12 +54,12 @@ namespace utility
 		return data;
 	}
 
-	void modifySlnFiles(const vector<string>& slnFiles)
+	void modifySlnFiles(const vector<string>& slnFiles, const INIParser& buildSettings)
 	{
-		
+
 	}
 
-	void modifyVcxprojFiles(const vector<string>& vcxprojFiles)
+	void modifyVcxprojFiles(const vector<string>& vcxprojFiles, const INIParser& buildSettings)
 	{
 
 	}
