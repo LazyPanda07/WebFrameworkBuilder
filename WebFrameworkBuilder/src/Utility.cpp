@@ -16,6 +16,8 @@ void addAdditionalIncludeDirectories(const utility::INIParser& buildSettings, co
 
 void addImportLibrary(const utility::INIParser& buildSettings, string& vcxprojFile);
 
+void addProjectReference(const unordered_map<string, string>& projGUID, string& vcxprojFile);
+
 namespace utility
 {
 	vector<string> parseData(const string& data)
@@ -56,8 +58,6 @@ namespace utility
 	{
 		cout << "Enter " << typeOfData << " with '?' as delimiter" << endl;
 		string data;
-
-		cin.ignore();
 
 		getline(cin, data);
 
@@ -107,6 +107,8 @@ namespace utility
 			addAdditionalIncludeDirectories(buildSettings, projGUID, data);
 
 			addImportLibrary(buildSettings, data);
+
+			addProjectReference(projGUID, data);
 
 			file.close();
 
@@ -332,3 +334,35 @@ void addImportLibrary(const utility::INIParser& buildSettings, string& vcxprojFi
 		startLink += vcxproj::startLinkTag.size() + 1;
 	}
 }
+
+void addProjectReference(const unordered_map<string, string>& projGUID, string& vcxprojFile)
+{
+	const string& webFrameworkGUID = projGUID.at(webFrameworkName);
+	size_t lastItemDefinition = vcxprojFile.rfind(vcxproj::endItemDefinitionGroupTag) + vcxproj::endItemDefinitionGroupTag.size() + 1;
+	string topLevelSpaces;
+	string oneBottomLevelSpaces;
+	string twoBottomLevelSpaces;
+
+	while (vcxprojFile[lastItemDefinition] != '<')
+	{
+		topLevelSpaces += ' ';
+		lastItemDefinition++;
+	}
+
+	oneBottomLevelSpaces = topLevelSpaces + ' ';
+	twoBottomLevelSpaces = oneBottomLevelSpaces + ' ';
+
+	lastItemDefinition = vcxprojFile.rfind(vcxproj::endItemDefinitionGroupTag) + vcxproj::endItemDefinitionGroupTag.size() + 1;
+
+	string projectReference = topLevelSpaces + vcxproj::startItemGroupTag + '\n' +
+		oneBottomLevelSpaces + "<ProjectReference Include=\"..\\" + webFrameworkFolder + '\\' + webFrameworkName + '\\' + webFrameworkName + extensions::projFile + "\">\n" +
+		twoBottomLevelSpaces + vcxproj::startProjectTag + webFrameworkGUID + vcxproj::endProjectTag + '\n' +
+		oneBottomLevelSpaces + "</ProjectReference>\n" +
+		topLevelSpaces + vcxproj::endItemGroupTag + '\n';
+
+	vcxprojFile.insert(vcxprojFile.begin() + lastItemDefinition, projectReference.begin(), projectReference.end());
+}
+
+/*
+C:\Users\semen\source\repos\WebFrameworkBuilder\Test\Test.vcxproj
+*/

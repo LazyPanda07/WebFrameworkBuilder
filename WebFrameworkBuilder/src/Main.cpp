@@ -42,6 +42,8 @@ int main(int argc, char** argv)
 
 		if (variant == "1")
 		{
+			cin.ignore();
+
 			targetVcxprojFiles = utility::parseData(utility::getData(".vcxproj files to modify"));
 			targetSlnFiles = utility::parseData(utility::getData(".sln files to modify"));
 
@@ -49,12 +51,16 @@ int main(int argc, char** argv)
 		}
 		else if (variant == "2")
 		{
+			cin.ignore();
+
 			targetVcxprojFiles = utility::parseData(utility::getData(".vcxproj files to modify"));
 
 			break;
 		}
 		else if (variant == "3")
 		{
+			cin.ignore();
+
 			targetSlnFiles = utility::parseData(utility::getData(".sln files to modify"));
 
 			break;

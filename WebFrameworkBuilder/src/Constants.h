@@ -3,6 +3,7 @@
 #include <string>
 #include <array>
 
+inline const std::string webFrameworkName = "WebFramework";
 inline const std::string mainSectionName = "WebFramework";
 inline const std::string dependenciesArrayName = "dependencies";
 
@@ -50,4 +51,13 @@ namespace vcxproj
 
 	inline const std::string startLinkTag = "<Link>";
 	inline const std::string endLinkTag = "</Link>";
+
+	inline const std::string startItemDefinitionGroupTag = "<ItemDefinitionGroup>";
+	inline const std::string endItemDefinitionGroupTag = "</ItemDefinitionGroup>";
+
+	inline const std::string startItemGroupTag = "<ItemGroup>";
+	inline const std::string endItemGroupTag = "</ItemGroup>";
+
+	inline const std::string startProjectTag = "<Project>";
+	inline const std::string endProjectTag = "</Project>";
 }
