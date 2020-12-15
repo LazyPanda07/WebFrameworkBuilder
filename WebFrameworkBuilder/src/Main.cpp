@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void start(const vector<string>& targetVcxprojFiles, const vector<string>& targetSlnFiles, const utility::INIParser& buildSettings);
+void start(const vector<string>& targetVcxprojFiles, const vector<string>& targetSlnFiles, const utility::INIParser& buildSettings, const unordered_map<string, string>& projGUID);
 
 int main(int argc, char** argv)
 {
@@ -24,6 +24,12 @@ int main(int argc, char** argv)
 	string variant;
 	vector<string> targetVcxprojFiles;
 	vector<string> targetSlnFiles;
+	unordered_map<string, string> projGUID;	//vcxproj - GUID
+	
+	for (const auto& [i, j] : buildSettings.getSection("WebFramework"))
+	{
+		projGUID[j] = utility::getGUID();
+	}
 
 	cout << "Choose build variant" << endl
 		<< "1. Modify .vcxproj files and .sln files" << endl
@@ -59,12 +65,12 @@ int main(int argc, char** argv)
 		}
 	}
 
-	start(targetVcxprojFiles, targetSlnFiles, buildSettings);
+	start(targetVcxprojFiles, targetSlnFiles, buildSettings, projGUID);
 
 	return 0;
 }
 
-void start(const vector<string>& targetVcxprojFiles, const vector<string>& targetSlnFiles, const utility::INIParser& buildSettings)
+void start(const vector<string>& targetVcxprojFiles, const vector<string>& targetSlnFiles, const utility::INIParser& buildSettings, const unordered_map<string, string>& projGUID)
 {
 	if (targetVcxprojFiles.size() && targetSlnFiles.size())
 	{
@@ -76,6 +82,6 @@ void start(const vector<string>& targetVcxprojFiles, const vector<string>& targe
 	}
 	else if (targetSlnFiles.size())
 	{
-		utility::modifySlnFiles(targetSlnFiles, buildSettings);
+		utility::modifySlnFiles(targetSlnFiles, buildSettings, projGUID);
 	}
 }

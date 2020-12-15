@@ -28,3 +28,8 @@ namespace sln
 	inline const std::string postSolution = "postSolution";
 	inline const std::string preSolution = "preSolution";
 }
+
+namespace vcxproj
+{
+	inline const std::string clCompileTag = "<ClCompile>";
+}
