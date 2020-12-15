@@ -74,11 +74,13 @@ void start(const vector<string>& targetVcxprojFiles, const vector<string>& targe
 {
 	if (targetVcxprojFiles.size() && targetSlnFiles.size())
 	{
-		
+		utility::modifySlnFiles(targetSlnFiles, buildSettings, projGUID);
+
+		utility::modifyVcxprojFiles(targetVcxprojFiles, buildSettings, projGUID);
 	}
 	else if (targetVcxprojFiles.size())
 	{
-
+		utility::modifyVcxprojFiles(targetVcxprojFiles, buildSettings, projGUID);
 	}
 	else if (targetSlnFiles.size())
 	{

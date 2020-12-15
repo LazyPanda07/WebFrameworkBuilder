@@ -3,12 +3,22 @@
 #include <string>
 #include <array>
 
+inline const std::string mainSectionName = "WebFramework";
+inline const std::string dependenciesArrayName = "dependencies";
+
+inline const std::string webFrameworkFolder = "WebFrameworkLibrary";
+
 inline const std::array<std::string, 2> configurationsToDelete = { "Debug|x86 = Debug|x86", "Release|x86 = Release|x86" };
 
 namespace extensions
 {
 	inline const std::string slnFile = ".sln";
 	inline const std::string projFile = ".vcxproj";
+}
+
+namespace vsMacros
+{
+	inline const std::string solutionDir = "$(SolutionDir)";
 }
 
 namespace sln
@@ -32,4 +42,6 @@ namespace sln
 namespace vcxproj
 {
 	inline const std::string clCompileTag = "<ClCompile>";
+	inline const std::string startAdditionalIncludeDirectoriesTag = "<AdditionalIncludeDirectories>";
+	inline const std::string endAdditionalIncludeDirectoriesTag = "</AdditionalIncludeDirectories>";
 }

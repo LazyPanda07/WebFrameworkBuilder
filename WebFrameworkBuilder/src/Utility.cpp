@@ -150,7 +150,7 @@ namespace utility
 void addProjectsToSlnFile(const utility::INIParser& buildSetting, const unordered_map<string, string>& projGUID, string& slnFile)
 {
 	size_t lastEndProject = slnFile.rfind(sln::endProject) + sln::endProject.size() + 1;
-	auto dependencies = buildSetting.getSection("WebFramework").equal_range("dependencies");
+	auto dependencies = buildSetting.getSection(mainSectionName).equal_range(dependenciesArrayName);
 	size_t startProjectConfigurationPlatforms = slnFile.find('\n', slnFile.find(sln::projectConfigurationPlatforms)) + 1;
 	string backSlashTString;
 	string topLevelOfBackSlashTString;
@@ -191,7 +191,7 @@ void addProjectsToSlnFile(const utility::INIParser& buildSetting, const unordere
 	for (auto& i = dependencies.first; i != dependencies.second; ++i)
 	{
 		const string& guid = projGUID.at(i->second);
-		string addProject = "Project(" + sln::visualCPlusPlusProjectGUID + ") = " + addQuotes(i->second) + ", " + addQuotes(i->second + '\\' + i->second + extensions::projFile) + ", " + addQuotes(guid) +
+		string addProject = "Project(" + sln::visualCPlusPlusProjectGUID + ") = " + addQuotes(i->second) + ", " + addQuotes(webFrameworkFolder + '\\' + i->second + '\\' + i->second + extensions::projFile) + ", " + addQuotes(guid) +
 			'\n' + sln::endProject + '\n';
 
 		slnFile.insert(slnFile.begin() + lastEndProject, addProject.begin(), addProject.end());
@@ -245,19 +245,31 @@ void eraseConfigurationPlatforms(string& slnFile)
 void addAdditionalIncludeDirectories(const utility::INIParser& buildSettings, const unordered_map<string, string>& projGUID, string& vcxprojFile)
 {
 	size_t startClCompile = vcxprojFile.find(vcxproj::clCompileTag) + vcxproj::clCompileTag.size() + 1;
-	string backSlashString;
-	const unordered_multimap<string, string> dependencies;
+	size_t stopOffset = startClCompile;
+	string spacesString;
+	auto dependencies = buildSettings.getSection(mainSectionName).equal_range(dependenciesArrayName);
 
 	while (vcxprojFile[startClCompile] != '<')
 	{
-		backSlashString += '\t';
+		spacesString += ' ';
 		startClCompile++;
 	}
 
-	for (const auto& [i, j] : dependencies)
-	{
-		
+	string addAdditionalIncludeDirectories = spacesString + vcxproj::startAdditionalIncludeDirectoriesTag;
 
-		
+	startClCompile = startClCompile = vcxprojFile.find(vcxproj::clCompileTag) + vcxproj::clCompileTag.size() + 1;
+
+	for (auto& i = dependencies.first; i != dependencies.second; ++i)
+	{
+		addAdditionalIncludeDirectories += vsMacros::solutionDir + webFrameworkFolder + "\\" + i->second + "\\src;";
+	}
+
+	addAdditionalIncludeDirectories += vcxproj::endAdditionalIncludeDirectoriesTag + '\n';
+
+	while (startClCompile >= stopOffset)
+	{
+		vcxprojFile.insert(vcxprojFile.begin() + startClCompile, addAdditionalIncludeDirectories.begin(), addAdditionalIncludeDirectories.end());
+
+		startClCompile = startClCompile = vcxprojFile.find(vcxproj::clCompileTag, startClCompile) + vcxproj::clCompileTag.size() + 1;
 	}
 }
