@@ -14,6 +14,8 @@ void eraseConfigurationPlatforms(string& slnFile);
 
 void addAdditionalIncludeDirectories(const utility::INIParser& buildSettings, const unordered_map<string, string>& projGUID, string& vcxprojFile);
 
+void addImportLibrary(const utility::INIParser& buildSettings, string& vcxprojFile);
+
 namespace utility
 {
 	vector<string> parseData(const string& data)
@@ -103,6 +105,8 @@ namespace utility
 			}
 
 			addAdditionalIncludeDirectories(buildSettings, projGUID, data);
+
+			addImportLibrary(buildSettings, data);
 
 			file.close();
 
@@ -296,5 +300,35 @@ void addAdditionalIncludeDirectories(const utility::INIParser& buildSettings, co
 
 			next = vcxprojFile.find(vcxproj::endAdditionalIncludeDirectoriesTag, vcxprojFile.find(vcxproj::endAdditionalIncludeDirectoriesTag, next) + 1);
 		}
+	}
+}
+
+void addImportLibrary(const utility::INIParser& buildSettings, string& vcxprojFile)
+{
+	const string& libraryName = buildSettings.getKeyValue(mainSectionName, "linkLibrary");
+	size_t startLink = vcxprojFile.find(vcxproj::startLinkTag) + vcxproj::startLinkTag.size() + 1;
+	string spacesString;
+
+	while (vcxprojFile[startLink] != '<')
+	{
+		spacesString += ' ';
+		startLink++;
+	}
+
+	const string importLibraryString = spacesString + vcxproj::startImportLibraryTag + libraryName + vcxproj::endImportLibraryTag + '\n';
+	startLink = vcxprojFile.find(vcxproj::startLinkTag) + vcxproj::startLinkTag.size() + 1;
+
+	while (true)
+	{
+		vcxprojFile.insert(vcxprojFile.begin() + startLink, importLibraryString.begin(), importLibraryString.end());
+
+		startLink = vcxprojFile.find(vcxproj::startLinkTag, startLink + importLibraryString.size());
+
+		if (startLink == string::npos)
+		{
+			break;
+		}
+
+		startLink += vcxproj::startLinkTag.size() + 1;
 	}
 }

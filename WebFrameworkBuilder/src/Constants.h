@@ -44,4 +44,10 @@ namespace vcxproj
 	inline const std::string clCompileTag = "<ClCompile>";
 	inline const std::string startAdditionalIncludeDirectoriesTag = "<AdditionalIncludeDirectories>";
 	inline const std::string endAdditionalIncludeDirectoriesTag = "</AdditionalIncludeDirectories>";
+
+	inline const std::string startImportLibraryTag = "<ImportLibrary>";
+	inline const std::string endImportLibraryTag = "</ImportLibrary>";
+
+	inline const std::string startLinkTag = "<Link>";
+	inline const std::string endLinkTag = "</Link>";
 }
