@@ -255,21 +255,46 @@ void addAdditionalIncludeDirectories(const utility::INIParser& buildSettings, co
 		startClCompile++;
 	}
 
-	string addAdditionalIncludeDirectories = spacesString + vcxproj::startAdditionalIncludeDirectoriesTag;
-
-	startClCompile = startClCompile = vcxprojFile.find(vcxproj::clCompileTag) + vcxproj::clCompileTag.size() + 1;
+	string addAdditionalIncludeDirectories;
 
 	for (auto& i = dependencies.first; i != dependencies.second; ++i)
 	{
 		addAdditionalIncludeDirectories += vsMacros::solutionDir + webFrameworkFolder + "\\" + i->second + "\\src;";
 	}
 
-	addAdditionalIncludeDirectories += vcxproj::endAdditionalIncludeDirectoriesTag + '\n';
-
-	while (startClCompile >= stopOffset)
+	if (vcxprojFile.find(vcxproj::startAdditionalIncludeDirectoriesTag) == string::npos)
 	{
-		vcxprojFile.insert(vcxprojFile.begin() + startClCompile, addAdditionalIncludeDirectories.begin(), addAdditionalIncludeDirectories.end());
+		addAdditionalIncludeDirectories.insert(addAdditionalIncludeDirectories.begin(), vcxproj::startAdditionalIncludeDirectoriesTag.begin(), vcxproj::startAdditionalIncludeDirectoriesTag.end());
 
-		startClCompile = startClCompile = vcxprojFile.find(vcxproj::clCompileTag, startClCompile) + vcxproj::clCompileTag.size() + 1;
+		addAdditionalIncludeDirectories.insert(addAdditionalIncludeDirectories.begin(), spacesString.begin(), spacesString.end());
+
+		startClCompile = vcxprojFile.find(vcxproj::clCompileTag) + vcxproj::clCompileTag.size() + 1;
+
+		addAdditionalIncludeDirectories += vcxproj::endAdditionalIncludeDirectoriesTag + '\n';
+
+		while (startClCompile >= stopOffset)
+		{
+			vcxprojFile.insert(vcxprojFile.begin() + startClCompile, addAdditionalIncludeDirectories.begin(), addAdditionalIncludeDirectories.end());
+
+			startClCompile = vcxprojFile.find(vcxproj::clCompileTag, startClCompile) + vcxproj::clCompileTag.size() + 1;
+		}
+	}
+	else
+	{
+		size_t next = vcxprojFile.find(vcxproj::endAdditionalIncludeDirectoriesTag);
+
+		while (next != string::npos)
+		{
+			if (vcxprojFile[next - 1] == ';')
+			{
+				vcxprojFile.insert(vcxprojFile.begin() + next, addAdditionalIncludeDirectories.begin(), addAdditionalIncludeDirectories.end());
+			}
+			else
+			{
+				vcxprojFile.insert(vcxprojFile.insert(vcxprojFile.begin() + next, ';') + 1, addAdditionalIncludeDirectories.begin(), addAdditionalIncludeDirectories.end());
+			}
+
+			next = vcxprojFile.find(vcxproj::endAdditionalIncludeDirectoriesTag, vcxprojFile.find(vcxproj::endAdditionalIncludeDirectoriesTag, next) + 1);
+		}
 	}
 }
