@@ -53,6 +53,8 @@ int main(int argc, char** argv)
 
 	end();
 
+	cout << "Successful" << endl;
+
 #ifdef NDEBUG
 	system("pause");
 #endif // NDEBUG
