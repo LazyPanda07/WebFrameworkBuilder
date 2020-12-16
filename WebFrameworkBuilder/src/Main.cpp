@@ -2,6 +2,7 @@
 #include <filesystem>
 
 #include "Utility.h"
+#include "Constants.h"
 
 #pragma comment (lib, "INIParser.lib")
 
@@ -10,6 +11,8 @@ using namespace std;
 void start(const vector<string>& targetVcxprojFiles, const vector<string>& targetSlnFiles, const utility::INIParser& buildSettings);
 
 void chooseVariant(vector<string>& targetVcxprojFiles, vector<string>& targetSlnFiles);
+
+void end();
 
 int main(int argc, char** argv)
 {
@@ -47,6 +50,8 @@ int main(int argc, char** argv)
 	}
 
 	start(targetVcxprojFiles, targetSlnFiles, buildSettings);
+
+	end();
 
 #ifdef NDEBUG
 	system("pause");
@@ -109,6 +114,27 @@ void chooseVariant(vector<string>& targetVcxprojFiles, vector<string>& targetSln
 		else
 		{
 			cout << "Try again" << endl;
+		}
+	}
+}
+
+void end()
+{
+	filesystem::path currentPath(filesystem::current_path());
+
+	if (filesystem::path(currentPath).parent_path().filename() == webFrameworkFolder)
+	{
+		currentPath /= webFrameworkName + extensions::slnFile;
+
+		filesystem::remove(currentPath);
+	}
+	else
+	{
+		if (filesystem::exists(currentPath /= webFrameworkFolder))
+		{
+			currentPath /= webFrameworkName + extensions::slnFile;
+
+			filesystem::remove(currentPath);
 		}
 	}
 }
