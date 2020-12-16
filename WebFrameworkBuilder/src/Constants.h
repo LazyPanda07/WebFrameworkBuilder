@@ -4,8 +4,8 @@
 #include <array>
 
 inline const std::string webFrameworkName = "WebFramework";
-inline const std::string mainSectionName = "WebFramework";
-inline const std::string dependenciesArrayName = "dependencies";
+inline const std::string webFrameworkSettings = "WebFrameworkSettings";
+inline const std::string webFrameworkLink = "WebFrameworkLink";
 
 inline const std::string webFrameworkFolder = "WebFrameworkLibrary";
 
