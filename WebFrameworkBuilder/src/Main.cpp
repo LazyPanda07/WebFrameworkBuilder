@@ -122,7 +122,7 @@ void end()
 {
 	filesystem::path currentPath(filesystem::current_path());
 
-	if (filesystem::path(currentPath).parent_path().filename() == webFrameworkFolder)
+	if (filesystem::path(currentPath).filename() == webFrameworkFolder)
 	{
 		currentPath /= webFrameworkName + extensions::slnFile;
 
