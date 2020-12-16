@@ -1,6 +1,7 @@
 #include "Utility.h"
 
 #include <iostream>
+#include <filesystem>
 
 #include <Windows.h>
 
@@ -60,6 +61,11 @@ namespace utility
 		string data;
 
 		getline(cin, data);
+
+		if (!filesystem::exists(data))
+		{
+			throw runtime_error("File " + data + " doesn't exist");
+		}
 
 		return data;
 	}

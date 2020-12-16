@@ -9,6 +9,8 @@ using namespace std;
 
 void start(const vector<string>& targetVcxprojFiles, const vector<string>& targetSlnFiles, const utility::INIParser& buildSettings);
 
+void chooseVariant(vector<string>& targetVcxprojFiles, vector<string>& targetSlnFiles);
+
 int main(int argc, char** argv)
 {
 	const filesystem::path buildFile(BUILD_FILE);
@@ -21,7 +23,6 @@ int main(int argc, char** argv)
 	}
 
 	utility::INIParser buildSettings(buildFile);
-	string variant;
 	vector<string> targetVcxprojFiles;
 	vector<string> targetSlnFiles;
 
@@ -29,6 +30,52 @@ int main(int argc, char** argv)
 		<< "1. Modify .vcxproj files and .sln files" << endl
 		<< "2. Modify .vcxproj files" << endl
 		<< "3. Modify .sln files" << endl;
+
+	try
+	{
+		chooseVariant(targetVcxprojFiles, targetSlnFiles);
+	}
+	catch (const runtime_error& e)
+	{
+		cout << e.what() << endl;
+
+#ifdef NDEBUG
+		system("pause");
+#endif // NDEBUG
+
+		return -1;
+	}
+
+	start(targetVcxprojFiles, targetSlnFiles, buildSettings);
+
+#ifdef NDEBUG
+	system("pause");
+#endif // NDEBUG
+
+	return 0;
+}
+
+void start(const vector<string>& targetVcxprojFiles, const vector<string>& targetSlnFiles, const utility::INIParser& buildSettings)
+{
+	if (targetVcxprojFiles.size() && targetSlnFiles.size())
+	{
+		utility::modifySlnFiles(targetSlnFiles, buildSettings);
+
+		utility::modifyVcxprojFiles(targetVcxprojFiles, buildSettings);
+	}
+	else if (targetVcxprojFiles.size())
+	{
+		utility::modifyVcxprojFiles(targetVcxprojFiles, buildSettings);
+	}
+	else if (targetSlnFiles.size())
+	{
+		utility::modifySlnFiles(targetSlnFiles, buildSettings);
+	}
+}
+
+void chooseVariant(vector<string>& targetVcxprojFiles, vector<string>& targetSlnFiles)
+{
+	string variant;
 
 	while (true)
 	{
@@ -63,27 +110,5 @@ int main(int argc, char** argv)
 		{
 			cout << "Try again" << endl;
 		}
-	}
-
-	start(targetVcxprojFiles, targetSlnFiles, buildSettings);
-
-	return 0;
-}
-
-void start(const vector<string>& targetVcxprojFiles, const vector<string>& targetSlnFiles, const utility::INIParser& buildSettings)
-{
-	if (targetVcxprojFiles.size() && targetSlnFiles.size())
-	{
-		utility::modifySlnFiles(targetSlnFiles, buildSettings);
-
-		utility::modifyVcxprojFiles(targetVcxprojFiles, buildSettings);
-	}
-	else if (targetVcxprojFiles.size())
-	{
-		utility::modifyVcxprojFiles(targetVcxprojFiles, buildSettings);
-	}
-	else if (targetSlnFiles.size())
-	{
-		utility::modifySlnFiles(targetSlnFiles, buildSettings);
 	}
 }
