@@ -46,8 +46,8 @@ namespace vcxproj
 	inline const std::string startAdditionalIncludeDirectoriesTag = "<AdditionalIncludeDirectories>";
 	inline const std::string endAdditionalIncludeDirectoriesTag = "</AdditionalIncludeDirectories>";
 
-	inline const std::string startImportLibraryTag = "<ImportLibrary>";
-	inline const std::string endImportLibraryTag = "</ImportLibrary>";
+	inline const std::string startAdditionalDependenciesTag = "<AdditionalDependencies>";
+	inline const std::string endAdditionalDependenciesTag = "</AdditionalDependencies>";
 
 	inline const std::string startLinkTag = "<Link>";
 	inline const std::string endLinkTag = "</Link>";
@@ -60,4 +60,6 @@ namespace vcxproj
 
 	inline const std::string startProjectTag = "<Project>";
 	inline const std::string endProjectTag = "</Project>";
+
+	inline const std::string additionalDependenciesMacro = "%(AdditionalDependencies)";
 }

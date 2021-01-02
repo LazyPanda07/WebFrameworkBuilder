@@ -15,7 +15,7 @@ void eraseConfigurationPlatforms(string& slnFile);
 
 void addAdditionalIncludeDirectories(const utility::INIParser& buildSettings, string& vcxprojFile);
 
-void addImportLibrary(const utility::INIParser& buildSettings, string& vcxprojFile);
+void addAdditionalDependencies(const utility::INIParser& buildSettings, string& vcxprojFile);
 
 void addProjectReference(const utility::INIParser& buildSettings, string& vcxprojFile);
 
@@ -112,7 +112,7 @@ namespace utility
 
 			addAdditionalIncludeDirectories(buildSettings, data);
 
-			addImportLibrary(buildSettings, data);
+			addAdditionalDependencies(buildSettings, data);
 
 			addProjectReference(buildSettings, data);
 
@@ -307,7 +307,7 @@ void addAdditionalIncludeDirectories(const utility::INIParser& buildSettings, st
 	}
 }
 
-void addImportLibrary(const utility::INIParser& buildSettings, string& vcxprojFile)
+void addAdditionalDependencies(const utility::INIParser& buildSettings, string& vcxprojFile)
 {
 	const string& libraryName = buildSettings.getKeyValue(webFrameworkLink, "linkLibrary");
 	size_t startLink = vcxprojFile.find(vcxproj::startLinkTag) + vcxproj::startLinkTag.size() + 1;
@@ -319,14 +319,27 @@ void addImportLibrary(const utility::INIParser& buildSettings, string& vcxprojFi
 		startLink++;
 	}
 
-	const string importLibraryString = spacesString + vcxproj::startImportLibraryTag + libraryName + vcxproj::endImportLibraryTag + '\n';
+	const string additionalDependenciesString = spacesString + vcxproj::startAdditionalDependenciesTag + libraryName + ';' + vcxproj::additionalDependenciesMacro + vcxproj::endAdditionalDependenciesTag + '\n';
 	startLink = vcxprojFile.find(vcxproj::startLinkTag) + vcxproj::startLinkTag.size() + 1;
 
 	while (true)
 	{
-		vcxprojFile.insert(vcxprojFile.begin() + startLink, importLibraryString.begin(), importLibraryString.end());
+		size_t checkAdditionalDependencies = vcxprojFile.find(vcxproj::endAdditionalDependenciesTag, startLink);
 
-		startLink = vcxprojFile.find(vcxproj::startLinkTag, startLink + importLibraryString.size());
+		if (checkAdditionalDependencies == string::npos)
+		{
+			vcxprojFile.insert(vcxprojFile.begin() + startLink, additionalDependenciesString.begin(), additionalDependenciesString.end());
+
+			startLink = vcxprojFile.find(vcxproj::startLinkTag, startLink + additionalDependenciesString.size());
+		}
+		else
+		{
+			string appendAdditionalDependencies = ';' + libraryName;
+
+			vcxprojFile.insert(vcxprojFile.begin() + checkAdditionalDependencies, appendAdditionalDependencies.begin(), appendAdditionalDependencies.end());
+
+			startLink = vcxprojFile.find(vcxproj::startLinkTag, startLink + appendAdditionalDependencies.size());
+		}
 
 		if (startLink == string::npos)
 		{
