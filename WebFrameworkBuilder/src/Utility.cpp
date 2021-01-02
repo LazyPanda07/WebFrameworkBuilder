@@ -267,26 +267,26 @@ void addAdditionalIncludeDirectories(const utility::INIParser& buildSettings, st
 		startClCompile++;
 	}
 
-	string addAdditionalIncludeDirectories;
+	string additionalIncludeDirectories;
 
 	for (const auto& i : dependencies)
 	{
-		addAdditionalIncludeDirectories += vsMacros::solutionDir + webFrameworkFolder + "\\" + i.first + "\\src;";
+		additionalIncludeDirectories += vsMacros::solutionDir + webFrameworkFolder + "\\" + i.first + "\\src;";
 	}
 
 	if (vcxprojFile.find(vcxproj::startAdditionalIncludeDirectoriesTag) == string::npos)
 	{
-		addAdditionalIncludeDirectories.insert(addAdditionalIncludeDirectories.begin(), vcxproj::startAdditionalIncludeDirectoriesTag.begin(), vcxproj::startAdditionalIncludeDirectoriesTag.end());
+		additionalIncludeDirectories.insert(additionalIncludeDirectories.begin(), vcxproj::startAdditionalIncludeDirectoriesTag.begin(), vcxproj::startAdditionalIncludeDirectoriesTag.end());
 
-		addAdditionalIncludeDirectories.insert(addAdditionalIncludeDirectories.begin(), spacesString.begin(), spacesString.end());
+		additionalIncludeDirectories.insert(additionalIncludeDirectories.begin(), spacesString.begin(), spacesString.end());
 
 		startClCompile = vcxprojFile.find(vcxproj::clCompileTag) + vcxproj::clCompileTag.size() + 1;
 
-		addAdditionalIncludeDirectories += vcxproj::endAdditionalIncludeDirectoriesTag + '\n';
+		additionalIncludeDirectories += vcxproj::endAdditionalIncludeDirectoriesTag + '\n';
 
 		while (startClCompile >= stopOffset)
 		{
-			vcxprojFile.insert(vcxprojFile.begin() + startClCompile, addAdditionalIncludeDirectories.begin(), addAdditionalIncludeDirectories.end());
+			vcxprojFile.insert(vcxprojFile.begin() + startClCompile, additionalIncludeDirectories.begin(), additionalIncludeDirectories.end());
 
 			startClCompile = vcxprojFile.find(vcxproj::clCompileTag, startClCompile) + vcxproj::clCompileTag.size() + 1;
 		}
@@ -299,11 +299,11 @@ void addAdditionalIncludeDirectories(const utility::INIParser& buildSettings, st
 		{
 			if (vcxprojFile[next - 1] == ';')
 			{
-				vcxprojFile.insert(vcxprojFile.begin() + next, addAdditionalIncludeDirectories.begin(), addAdditionalIncludeDirectories.end());
+				vcxprojFile.insert(vcxprojFile.begin() + next, additionalIncludeDirectories.begin(), additionalIncludeDirectories.end());
 			}
 			else
 			{
-				vcxprojFile.insert(vcxprojFile.insert(vcxprojFile.begin() + next, ';') + 1, addAdditionalIncludeDirectories.begin(), addAdditionalIncludeDirectories.end());
+				vcxprojFile.insert(vcxprojFile.insert(vcxprojFile.begin() + next, ';') + 1, additionalIncludeDirectories.begin(), additionalIncludeDirectories.end());
 			}
 
 			next = vcxprojFile.find(vcxproj::endAdditionalIncludeDirectoriesTag, vcxprojFile.find(vcxproj::endAdditionalIncludeDirectoriesTag, next) + 1);
@@ -323,7 +323,7 @@ void addAdditionalDependencies(const utility::INIParser& buildSettings, string& 
 		startLink++;
 	}
 
-	const string additionalDependenciesString = spacesString + vcxproj::startAdditionalDependenciesTag + libraryName + ';' + vcxproj::additionalDependenciesMacro + vcxproj::endAdditionalDependenciesTag + '\n';
+	const string additionalDependenciesString = spacesString + vcxproj::startAdditionalDependenciesTag + libraryName + ';' + vcxproj::additionalDependenciesMacro + ';' + vcxproj::endAdditionalDependenciesTag + '\n';
 	startLink = vcxprojFile.find(vcxproj::startLinkTag) + vcxproj::startLinkTag.size() + 1;
 
 	while (true)
@@ -338,7 +338,7 @@ void addAdditionalDependencies(const utility::INIParser& buildSettings, string& 
 		}
 		else
 		{
-			string appendAdditionalDependencies = ';' + libraryName;
+			string appendAdditionalDependencies = ';' + libraryName + ';';
 
 			vcxprojFile.insert(vcxprojFile.begin() + checkAdditionalDependencies, appendAdditionalDependencies.begin(), appendAdditionalDependencies.end());
 
@@ -356,7 +356,7 @@ void addAdditionalDependencies(const utility::INIParser& buildSettings, string& 
 
 void addAdditionalLibraryDirectories(string& vcxprojFile)
 {
-	const string libPaths = R"($(SolutionDir)bin\$(Configuration)-$(Platform)\)" + webFrameworkName + ';' + "$(SolutionDir)" + webFrameworkFolder + '\\' + webFrameworkName + "\\libs";
+	const string libPaths = R"($(SolutionDir)bin\$(Configuration)-$(Platform)\)" + webFrameworkName + ';' + "$(SolutionDir)" + webFrameworkFolder + '\\' + webFrameworkName + "\\libs;";
 	size_t startLink = vcxprojFile.find(vcxproj::startLinkTag) + vcxproj::startLinkTag.size() + 1;
 	string spacesString;
 
@@ -424,7 +424,3 @@ void addProjectReference(const utility::INIParser& buildSettings, string& vcxpro
 
 	vcxprojFile.insert(vcxprojFile.begin() + lastItemDefinition, projectReference.begin(), projectReference.end());
 }
-
-/*
-<AdditionalLibraryDirectories>$(SolutionDir)bin\$(Configuration)-$(Platform)\WebFramework;$(SolutionDir)WebFrameworkLibrary\WebFramework\libs</AdditionalLibraryDirectories>
-*/
