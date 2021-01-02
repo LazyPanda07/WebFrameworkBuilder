@@ -17,6 +17,8 @@ void addAdditionalIncludeDirectories(const utility::INIParser& buildSettings, st
 
 void addAdditionalDependencies(const utility::INIParser& buildSettings, string& vcxprojFile);
 
+void addAdditionalLibraryDirectories(string& vcxprojFile);
+
 void addProjectReference(const utility::INIParser& buildSettings, string& vcxprojFile);
 
 namespace utility
@@ -113,6 +115,8 @@ namespace utility
 			addAdditionalIncludeDirectories(buildSettings, data);
 
 			addAdditionalDependencies(buildSettings, data);
+
+			addAdditionalLibraryDirectories(data);
 
 			addProjectReference(buildSettings, data);
 
@@ -350,6 +354,49 @@ void addAdditionalDependencies(const utility::INIParser& buildSettings, string& 
 	}
 }
 
+void addAdditionalLibraryDirectories(string& vcxprojFile)
+{
+	const string libPaths = R"($(SolutionDir)bin\$(Configuration)-$(Platform)\)" + webFrameworkName + ';' + "$(SolutionDir)" + webFrameworkFolder + '\\' + webFrameworkName + "\\libs";
+	size_t startLink = vcxprojFile.find(vcxproj::startLinkTag) + vcxproj::startLinkTag.size() + 1;
+	string spacesString;
+
+	while (vcxprojFile[startLink] != '<')
+	{
+		spacesString += ' ';
+		startLink++;
+	}
+
+	const string additionalLibraryDirectoriesString = spacesString + vcxproj::startAdditionalLibraryDirectoriesTag + libPaths + vcxproj::endAdditionalLibraryDirectoriesTag + '\n';
+	startLink = vcxprojFile.find(vcxproj::startLinkTag) + vcxproj::startLinkTag.size() + 1;
+
+	while (true)
+	{
+		size_t checkAdditionalLibraryDirectories = vcxprojFile.find(vcxproj::endAdditionalLibraryDirectoriesTag, startLink);
+
+		if (checkAdditionalLibraryDirectories == string::npos)
+		{
+			vcxprojFile.insert(vcxprojFile.begin() + startLink, additionalLibraryDirectoriesString.begin(), additionalLibraryDirectoriesString.end());
+
+			startLink = vcxprojFile.find(vcxproj::startLinkTag, startLink + additionalLibraryDirectoriesString.size());
+		}
+		else
+		{
+			string appendAdditionalLibraryDirectories = ';' + libPaths;
+
+			vcxprojFile.insert(vcxprojFile.begin() + checkAdditionalLibraryDirectories, appendAdditionalLibraryDirectories.begin(), appendAdditionalLibraryDirectories.end());
+
+			startLink = vcxprojFile.find(vcxproj::startLinkTag, startLink + appendAdditionalLibraryDirectories.size());
+		}
+
+		if (startLink == string::npos)
+		{
+			break;
+		}
+
+		startLink += vcxproj::startLinkTag.size() + 1;
+	}
+}
+
 void addProjectReference(const utility::INIParser& buildSettings, string& vcxprojFile)
 {
 	string webFrameworkGUID = buildSettings.getSection(webFrameworkSettings).equal_range(webFrameworkName).first->second;
@@ -377,3 +424,7 @@ void addProjectReference(const utility::INIParser& buildSettings, string& vcxpro
 
 	vcxprojFile.insert(vcxprojFile.begin() + lastItemDefinition, projectReference.begin(), projectReference.end());
 }
+
+/*
+<AdditionalLibraryDirectories>$(SolutionDir)bin\$(Configuration)-$(Platform)\WebFramework;$(SolutionDir)WebFrameworkLibrary\WebFramework\libs</AdditionalLibraryDirectories>
+*/

@@ -49,6 +49,9 @@ namespace vcxproj
 	inline const std::string startAdditionalDependenciesTag = "<AdditionalDependencies>";
 	inline const std::string endAdditionalDependenciesTag = "</AdditionalDependencies>";
 
+	inline const std::string startAdditionalLibraryDirectoriesTag = "<AdditionalLibraryDirectories>";
+	inline const std::string endAdditionalLibraryDirectoriesTag = "</AdditionalLibraryDirectories>";
+
 	inline const std::string startLinkTag = "<Link>";
 	inline const std::string endLinkTag = "</Link>";
 
