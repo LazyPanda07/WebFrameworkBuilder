@@ -54,6 +54,14 @@ namespace utility
 			startPath = endPath + 1;
 		} while (endPath != string::npos);
 
+		for (const auto& i : result)
+		{
+			if (!filesystem::exists(i))
+			{
+				throw runtime_error("File " + i + " doesn't exist");
+			}
+		}
+
 		return result;
 	}
 
@@ -63,11 +71,6 @@ namespace utility
 		string data;
 
 		getline(cin, data);
-
-		if (!filesystem::exists(data))
-		{
-			throw runtime_error("File " + data + " doesn't exist");
-		}
 
 		return data;
 	}
