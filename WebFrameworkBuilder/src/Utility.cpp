@@ -208,8 +208,18 @@ void addProjectsToSlnFile(const utility::INIParser& buildSetting, string& slnFil
 
 	for (const auto& i : dependencies)
 	{
-		string addProject = "Project(" + sln::visualCPlusPlusProjectGUID + ") = " + addQuotes(i.first) + ", " + addQuotes(webFrameworkFolder + '\\' + i.first + '\\' + i.first + extensions::projFile) + ", " + addQuotes(i.second) +
-			'\n' + sln::endProject + '\n';
+		string addProject;
+		
+		if (auto it = inside_projects::insideProjectFiles.find(i.first); it != inside_projects::insideProjectFiles.end())
+		{
+			addProject = "Project(" + sln::visualCPlusPlusProjectGUID + ") = " + addQuotes(i.first) + ", " + addQuotes(webFrameworkFolder + '\\' + it->second) + ", " + addQuotes(i.second) +
+				'\n' + sln::endProject + '\n';
+		}
+		else
+		{
+			addProject = "Project(" + sln::visualCPlusPlusProjectGUID + ") = " + addQuotes(i.first) + ", " + addQuotes(webFrameworkFolder + '\\' + i.first + '\\' + i.first + extensions::projFile) + ", " + addQuotes(i.second) +
+				'\n' + sln::endProject + '\n';
+		}
 
 		slnFile.insert(slnFile.begin() + lastEndProject, addProject.begin(), addProject.end());
 
@@ -274,7 +284,14 @@ void addAdditionalIncludeDirectories(const utility::INIParser& buildSettings, st
 
 	for (const auto& i : dependencies)
 	{
-		additionalIncludeDirectories += vsMacros::solutionDir + webFrameworkFolder + "\\" + i.first + "\\src;";
+		if (auto it = inside_projects::insideProjectIncludeDirectories.find(i.first); it != inside_projects::insideProjectIncludeDirectories.end())
+		{
+			additionalIncludeDirectories += vsMacros::solutionDir + webFrameworkFolder + "\\" + it->second;
+		}
+		else
+		{
+			additionalIncludeDirectories += vsMacros::solutionDir + webFrameworkFolder + "\\" + i.first + "\\src;";
+		}
 	}
 
 	if (vcxprojFile.find(vcxproj::startAdditionalIncludeDirectoriesTag) == string::npos)

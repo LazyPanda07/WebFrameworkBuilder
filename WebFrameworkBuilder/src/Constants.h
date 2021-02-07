@@ -2,6 +2,7 @@
 
 #include <string>
 #include <array>
+#include <unordered_map>
 
 inline const std::string webFrameworkName = "WebFramework";
 inline const std::string webFrameworkSettings = "WebFrameworkSettings";
@@ -65,4 +66,17 @@ namespace vcxproj
 	inline const std::string endProjectTag = "</Project>";
 
 	inline const std::string additionalDependenciesMacro = "%(AdditionalDependencies)";
+}
+
+namespace inside_projects
+{
+	inline const std::unordered_map<std::string, std::string> insideProjectFiles =	//project name - project file path
+	{
+		{ "JSON", R"(HTTP\JSON\JSON.vcxproj)" }
+	};
+
+	inline const std::unordered_map<std::string, std::string> insideProjectIncludeDirectories =	//project name - path to directory with source files
+	{
+		{ "JSON" , R"(HTTP\JSON\src)" }
+	};
 }
