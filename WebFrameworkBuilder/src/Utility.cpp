@@ -286,7 +286,7 @@ void addAdditionalIncludeDirectories(const utility::INIParser& buildSettings, st
 	{
 		if (auto it = inside_projects::insideProjectIncludeDirectories.find(i.first); it != inside_projects::insideProjectIncludeDirectories.end())
 		{
-			additionalIncludeDirectories += vsMacros::solutionDir + webFrameworkFolder + "\\" + it->second;
+			additionalIncludeDirectories += vsMacros::solutionDir + webFrameworkFolder + "\\" + it->second + ';';
 		}
 		else
 		{

@@ -72,11 +72,15 @@ namespace inside_projects
 {
 	inline const std::unordered_map<std::string, std::string> insideProjectFiles =	//project name - project file path
 	{
-		{ "JSON", R"(HTTP\JSON\JSON.vcxproj)" }
+		{ "JSON", R"(Networks\HTTP\JSON\JSON.vcxproj)" },
+		{ "HTTP", R"(Networks\HTTP\HTTP.vcxproj)" },
+		{ "SocketStreams", R"(Networks\SocketStreams\SocketStreams.vcxproj)" }
 	};
 
 	inline const std::unordered_map<std::string, std::string> insideProjectIncludeDirectories =	//project name - path to directory with source files
 	{
-		{ "JSON" , R"(HTTP\JSON\src)" }
+		{ "JSON" , R"(Networks\HTTP\JSON\src)" },
+		{ "HTTP" , R"(Networks\HTTP\src)" },
+		{ "SocketStreams" , R"(Networks\SocketStreams\src)" }
 	};
 }
