@@ -333,9 +333,14 @@ void addAdditionalIncludeDirectories(const utility::INIParser& buildSettings, st
 
 void addAdditionalDependencies(const utility::INIParser& buildSettings, string& vcxprojFile)
 {
-	const string& libraryName = buildSettings.getKeyValue(webFrameworkLink, "linkLibrary");
+	string libraries;
 	size_t startLink = vcxprojFile.find(vcxproj::startLinkTag) + vcxproj::startLinkTag.size() + 1;
 	string spacesString;
+
+	for (const auto& i : linkingLibraries)
+	{
+		libraries += buildSettings.getKeyValue(webFrameworkLink, i) + ';';
+	}
 
 	while (vcxprojFile[startLink] != '<')
 	{
@@ -343,7 +348,7 @@ void addAdditionalDependencies(const utility::INIParser& buildSettings, string& 
 		startLink++;
 	}
 
-	const string additionalDependenciesString = spacesString + vcxproj::startAdditionalDependenciesTag + libraryName + ';' + vcxproj::additionalDependenciesMacro + ';' + vcxproj::endAdditionalDependenciesTag + '\n';
+	const string additionalDependenciesString = spacesString + vcxproj::startAdditionalDependenciesTag + libraries +  vcxproj::additionalDependenciesMacro + ';' + vcxproj::endAdditionalDependenciesTag + '\n';
 	startLink = vcxprojFile.find(vcxproj::startLinkTag) + vcxproj::startLinkTag.size() + 1;
 
 	while (true)
@@ -358,7 +363,7 @@ void addAdditionalDependencies(const utility::INIParser& buildSettings, string& 
 		}
 		else
 		{
-			string appendAdditionalDependencies = ';' + libraryName + ';';
+			string appendAdditionalDependencies = ';' + libraries;
 
 			vcxprojFile.insert(vcxprojFile.begin() + checkAdditionalDependencies, appendAdditionalDependencies.begin(), appendAdditionalDependencies.end());
 
@@ -376,7 +381,8 @@ void addAdditionalDependencies(const utility::INIParser& buildSettings, string& 
 
 void addAdditionalLibraryDirectories(string& vcxprojFile)
 {
-	const string libPaths = R"($(SolutionDir)bin\$(Configuration)-$(Platform)\)" + webFrameworkName + ';' + "$(SolutionDir)" + webFrameworkFolder + '\\' + webFrameworkName + "\\libs;";
+	const string libPaths = R"($(SolutionDir)bin\$(Configuration)-$(Platform)\)" + webFrameworkName + ';' + "$(SolutionDir)" + webFrameworkFolder + '\\' + webFrameworkName + "\\libs;"
+		"$(SolutionDir)" + webFrameworkFolder + R"(\Networks\vendor\OpenSSL\$(Configuration)-$(Platform);)";
 	size_t startLink = vcxprojFile.find(vcxproj::startLinkTag) + vcxproj::startLinkTag.size() + 1;
 	string spacesString;
 
