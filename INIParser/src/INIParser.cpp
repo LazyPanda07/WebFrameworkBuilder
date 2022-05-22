@@ -71,7 +71,7 @@ namespace utility
 
 	INIParser::INIParser(const string_view& fileName)
 	{
-		this->parse(ifstream(fileName));
+		this->parse(ifstream(fileName.data()));
 	}
 
 	INIParser::INIParser(const filesystem::path& fileName)

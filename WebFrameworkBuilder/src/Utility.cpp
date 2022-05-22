@@ -144,7 +144,7 @@ namespace utility
 
 			test.resize(39);
 
-			test.resize(StringFromGUID2(guid, test.data(), test.size()));
+			test.resize(StringFromGUID2(guid, test.data(), static_cast<int>(test.size())));
 
 			guidString.resize(test.size());
 
@@ -154,8 +154,6 @@ namespace utility
 			}
 
 			guidString.pop_back();
-
-			guidString = move(guidString);
 		}
 		else
 		{
