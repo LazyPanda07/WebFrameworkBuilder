@@ -255,6 +255,11 @@ void eraseConfigurationPlatforms(string& slnFile)
 		size_t findString = slnFile.find(i);
 		size_t backSlashTCount = 0;
 
+		if (findString == string::npos)
+		{
+			continue;
+		}
+
 		while (slnFile[findString] != '\n')
 		{
 			findString--;
