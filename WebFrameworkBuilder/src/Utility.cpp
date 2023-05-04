@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <filesystem>
+#include <fstream>
 
 #include <Windows.h>
 
@@ -9,17 +10,17 @@
 
 using namespace std;
 
-void addProjectsToSlnFile(const utility::INIParser& buildSetting, string& slnFile);
+void addProjectsToSlnFile(const json::JSONParser& buildSetting, string& slnFile);
 
 void eraseConfigurationPlatforms(string& slnFile);
 
-void addAdditionalIncludeDirectories(const utility::INIParser& buildSettings, string& vcxprojFile);
+void addAdditionalIncludeDirectories(const json::JSONParser& buildSettings, string& vcxprojFile);
 
-void addAdditionalDependencies(const utility::INIParser& buildSettings, string& vcxprojFile);
+void addAdditionalDependencies(const json::JSONParser& buildSettings, string& vcxprojFile);
 
 void addAdditionalLibraryDirectories(string& vcxprojFile);
 
-void addProjectReference(const utility::INIParser& buildSettings, string& vcxprojFile);
+void addProjectReference(const json::JSONParser& buildSettings, string& vcxprojFile);
 
 namespace utility
 {
@@ -75,7 +76,7 @@ namespace utility
 		return data;
 	}
 
-	void modifySlnFiles(const vector<string>& slnFiles, const INIParser& buildSettings)
+	void modifySlnFiles(const vector<string>& slnFiles, const json::JSONParser& buildSettings)
 	{
 		for (const auto& i : slnFiles)
 		{
@@ -102,7 +103,7 @@ namespace utility
 		}
 	}
 
-	void modifyVcxprojFiles(const vector<string>& vcxprojFiles, const INIParser& buildSettings)
+	void modifyVcxprojFiles(const vector<string>& vcxprojFiles, const json::JSONParser& buildSettings)
 	{
 		for (const auto& i : vcxprojFiles)
 		{
@@ -164,10 +165,10 @@ namespace utility
 	}
 }
 
-void addProjectsToSlnFile(const utility::INIParser& buildSetting, string& slnFile)
+void addProjectsToSlnFile(const json::JSONParser& buildSetting, string& slnFile)
 {
 	size_t lastEndProject = slnFile.rfind(sln::endProject) + sln::endProject.size() + 1;
-	const unordered_multimap<string, string>& dependencies = buildSetting.getSection(webFrameworkSettings);
+	const json::utility::jsonObject& dependencies = buildSetting.getObject(webFrameworkSettings);
 	size_t startProjectConfigurationPlatforms = slnFile.find('\n', slnFile.find(sln::projectConfigurationPlatforms)) + 1;
 	string backSlashTString;
 	string topLevelOfBackSlashTString;
@@ -204,18 +205,19 @@ void addProjectsToSlnFile(const utility::INIParser& buildSetting, string& slnFil
 		}
 	};
 
-	for (const auto& i : dependencies)
+	for (const auto& [key, valueVariant] : dependencies)
 	{
 		string addProject;
+		const string& value = get<string>(valueVariant);
 		
-		if (auto it = inside_projects::insideProjectFiles.find(i.first); it != inside_projects::insideProjectFiles.end())
+		if (auto it = inside_projects::insideProjectFiles.find(key); it != inside_projects::insideProjectFiles.end())
 		{
-			addProject = "Project(" + sln::visualCPlusPlusProjectGUID + ") = " + addQuotes(i.first) + ", " + addQuotes(webFrameworkFolder + '\\' + it->second) + ", " + addQuotes(i.second) +
+			addProject = "Project(" + sln::visualCPlusPlusProjectGUID + ") = " + addQuotes(key) + ", " + addQuotes(webFrameworkFolder + '\\' + it->second) + ", " + addQuotes(value) +
 				'\n' + sln::endProject + '\n';
 		}
 		else
 		{
-			addProject = "Project(" + sln::visualCPlusPlusProjectGUID + ") = " + addQuotes(i.first) + ", " + addQuotes(webFrameworkFolder + '\\' + i.first + '\\' + i.first + extensions::projFile) + ", " + addQuotes(i.second) +
+			addProject = "Project(" + sln::visualCPlusPlusProjectGUID + ") = " + addQuotes(key) + ", " + addQuotes(webFrameworkFolder + '\\' + key + '\\' + key + extensions::projFile) + ", " + addQuotes(value) +
 				'\n' + sln::endProject + '\n';
 		}
 
@@ -223,7 +225,7 @@ void addProjectsToSlnFile(const utility::INIParser& buildSetting, string& slnFil
 
 		size_t startProjectConfigurationPlatforms = slnFile.find('\n', slnFile.find(sln::projectConfigurationPlatforms)) + 1;
 
-		addConfigurationPlatforms(startProjectConfigurationPlatforms, i.second);
+		addConfigurationPlatforms(startProjectConfigurationPlatforms, value);
 	}
 
 	string guid = utility::getGUID();
@@ -236,9 +238,9 @@ void addProjectsToSlnFile(const utility::INIParser& buildSetting, string& slnFil
 	size_t preLastEndGlobalSection = slnFile.rfind(sln::endGlobalSection, slnFile.rfind(sln::endGlobalSection) + 1) + sln::endGlobalSection.size() + 1;
 	string nestedProjects = topLevelOfBackSlashTString + sln::startGlobalSection + sln::nestedProjects + " = " + sln::preSolution + '\n';
 
-	for (const auto& i : dependencies)
+	for (const auto& [key, value] : dependencies)
 	{
-		nestedProjects += backSlashTString + i.second + " = " + guid + '\n';
+		nestedProjects += backSlashTString + get<string>(value) + " = " + guid + '\n';
 	}
 
 	nestedProjects += topLevelOfBackSlashTString + sln::endGlobalSection + '\n';
@@ -265,12 +267,12 @@ void eraseConfigurationPlatforms(string& slnFile)
 	}
 }
 
-void addAdditionalIncludeDirectories(const utility::INIParser& buildSettings, string& vcxprojFile)
+void addAdditionalIncludeDirectories(const json::JSONParser& buildSettings, string& vcxprojFile)
 {
 	size_t startClCompile = vcxprojFile.find(vcxproj::clCompileTag) + vcxproj::clCompileTag.size() + 1;
 	size_t stopOffset = startClCompile;
 	string spacesString;
-	const unordered_multimap<string, string>& dependencies = buildSettings.getSection(webFrameworkSettings);
+	const json::utility::jsonObject& dependencies = buildSettings.getObject(webFrameworkSettings);
 
 	while (vcxprojFile[startClCompile] != '<')
 	{
@@ -329,7 +331,7 @@ void addAdditionalIncludeDirectories(const utility::INIParser& buildSettings, st
 	}
 }
 
-void addAdditionalDependencies(const utility::INIParser& buildSettings, string& vcxprojFile)
+void addAdditionalDependencies(const json::JSONParser& buildSettings, string& vcxprojFile)
 {
 	string libraries;
 	size_t startLink = vcxprojFile.find(vcxproj::startLinkTag) + vcxproj::startLinkTag.size() + 1;
@@ -337,7 +339,7 @@ void addAdditionalDependencies(const utility::INIParser& buildSettings, string& 
 
 	for (const auto& i : linkingLibraries)
 	{
-		libraries += buildSettings.getKeyValue(webFrameworkLink, i) + ';';
+		libraries += buildSettings.getObject(webFrameworkLink).getString(i) + ';';
 	}
 
 	while (vcxprojFile[startLink] != '<')
@@ -421,9 +423,9 @@ void addAdditionalLibraryDirectories(string& vcxprojFile)
 	}
 }
 
-void addProjectReference(const utility::INIParser& buildSettings, string& vcxprojFile)
+void addProjectReference(const json::JSONParser& buildSettings, string& vcxprojFile)
 {
-	string webFrameworkGUID = buildSettings.getSection(webFrameworkSettings).equal_range(webFrameworkName).first->second;
+	const string& webFrameworkGUID = buildSettings.getObject(webFrameworkSettings).getString(webFrameworkName);
 	size_t lastItemDefinition = vcxprojFile.rfind(vcxproj::endItemDefinitionGroupTag) + vcxproj::endItemDefinitionGroupTag.size() + 1;
 	string topLevelSpaces;
 	string oneBottomLevelSpaces;

@@ -1,14 +1,14 @@
 #include <iostream>
 #include <filesystem>
+#include <fstream>
 
 #include "Utility.h"
 #include "Constants.h"
-
-#pragma comment (lib, "INIParser.lib")
+#include "JSONParser.h"
 
 using namespace std;
 
-void start(const vector<string>& targetVcxprojFiles, const vector<string>& targetSlnFiles, const utility::INIParser& buildSettings);
+void start(const vector<string>& targetVcxprojFiles, const vector<string>& targetSlnFiles, const json::JSONParser& buildSettings);
 
 void chooseVariant(vector<string>& targetVcxprojFiles, vector<string>& targetSlnFiles);
 
@@ -16,7 +16,7 @@ void end();
 
 int main(int argc, char** argv)
 {
-	const filesystem::path buildFile(BUILD_FILE);
+	const filesystem::path buildFile("build_file.json");
 
 	if (!filesystem::exists(buildFile))
 	{
@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	utility::INIParser buildSettings(buildFile);
+	json::JSONParser buildSettings(move(ifstream(buildFile)));
 	vector<string> targetVcxprojFiles;
 	vector<string> targetSlnFiles;
 
@@ -62,7 +62,7 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-void start(const vector<string>& targetVcxprojFiles, const vector<string>& targetSlnFiles, const utility::INIParser& buildSettings)
+void start(const vector<string>& targetVcxprojFiles, const vector<string>& targetSlnFiles, const json::JSONParser& buildSettings)
 {
 	if (targetVcxprojFiles.size() && targetSlnFiles.size())
 	{

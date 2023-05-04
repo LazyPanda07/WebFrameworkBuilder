@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "INIParser.h"
+#include "JSONParser.h"
 
 namespace utility
 {
@@ -11,9 +11,9 @@ namespace utility
 
 	std::string getData(const std::string& typeOfData);
 
-	void modifySlnFiles(const std::vector<std::string>& slnFiles, const INIParser& buildSettings);
+	void modifySlnFiles(const std::vector<std::string>& slnFiles, const json::JSONParser& buildSettings);
 
-	void modifyVcxprojFiles(const std::vector<std::string>& vcxprojFiles, const INIParser& buildSettings);
+	void modifyVcxprojFiles(const std::vector<std::string>& vcxprojFiles, const json::JSONParser& buildSettings);
 
 	std::string getGUID();
 }

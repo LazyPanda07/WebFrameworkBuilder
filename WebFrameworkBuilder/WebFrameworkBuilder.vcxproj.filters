@@ -31,6 +31,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\build_file.ini" />
+    <None Include="assets\build_file.json" />
   </ItemGroup>
 </Project>
